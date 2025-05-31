@@ -1,0 +1,1 @@
+# Find-All-Solutions-with-Dynamic-Adjustment
