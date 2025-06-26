@@ -1,0 +1,21 @@
+2025-06-26 20:53:27 - INFO - For n = 15, N = 32768 and M = 90 ~ 181
+	error margin = 1.000 * sqrt(N)
+	average # and % of solutions not discovered by the proposed method: 1.73913, 1.38306%
+	average number of oracle calls: 4421.91
+	average # and % of solutions not discovered by the baseline method: 17.44565, 15.49107%
+	average number of oracle calls: 5834.17
+
+2025-06-26 20:53:29 - INFO - For n = 17, N = 131072 and M = 180 ~ 362
+	error margin = 1.000 * sqrt(N)
+	average # and % of solutions not discovered by the proposed method: 1.19126, 0.49473%
+	average number of oracle calls: 10824.66
+	average # and % of solutions not discovered by the baseline method: 25.38798, 10.12582%
+	average number of oracle calls: 15279.66
+
+2025-06-26 20:53:41 - INFO - For n = 19, N = 524288 and M = 361 ~ 724
+	error margin = 1.000 * sqrt(N)
+	average # and % of solutions not discovered by the proposed method: 1.06319, 0.19289%
+	average number of oracle calls: 31211.29
+	average # and % of solutions not discovered by the baseline method: 33.73626, 6.88293%
+	average number of oracle calls: 35638.67
+
