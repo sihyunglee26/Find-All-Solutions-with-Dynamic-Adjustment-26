@@ -1,4 +1,4 @@
-## Find-All-Solutions-with-Dynamic-Adjustment-25
+## Find-All-Solutions-with-Dynamic-Adjustment-26
 This repository contains sample files for a system designed to find all solutions in a search space using Grover's algorithm and dynamic updates of estimated solution count. The table below provides an overview of the available files.
 
 ### Sample Codes
