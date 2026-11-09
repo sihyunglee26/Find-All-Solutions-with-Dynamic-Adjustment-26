@@ -70,9 +70,7 @@ def search_with_dynamic_adjustment_qiskit(N, M_estimated, answersSetOriginal, er
     
     logging.debug(f"adjustment interval = {adjustment_interval} with {len(M_hypotheses)} hypotheses")
 
-    answersSet = answersSetOriginal.copy()
-    #answersSortedList = sorted(list(answersSet))
-    #print(f"{len(answersSortedList)} answers = {answersSortedList}")   
+    answersSet = answersSetOriginal.copy()     
 
     numDataQubits = n    
     numAncillaQubits = numDataQubits - 1
@@ -114,9 +112,8 @@ def search_with_dynamic_adjustment_qiskit(N, M_estimated, answersSetOriginal, er
             zero_streak = 0
             num_discovered_solutions += 1
             M_estimated = M_estimated - 1            
-            earlier_success_count += 1
-            answersSet.remove(measuredValueInt)
-            #answersSortedList.remove(measuredValueInt)
+            earlier_success_count += 1            
+            del answersSet[measuredValueInt]            
             new_solution_just_found = True
             #print(f"{measuredValueInt} was found")
         else:
@@ -270,16 +267,13 @@ def search_with_baseline_method_qiskit(N, M_estimated, answersSetOriginal):
     zero_streak = 0
 
     answersSet = answersSetOriginal.copy()
-    #answersSortedList = sorted(list(answersSet))
-    #print(f"{len(answersSortedList)} answers = {answersSortedList}")   
 
     numDataQubits = n    
     numAncillaQubits = numDataQubits - 1
     simulator = AerSimulator()
 
     new_solution_just_found = True
-
-    #print(f"loop begins")
+    
     while M_estimated > 0:           
         if new_solution_just_found:
             # 
@@ -312,9 +306,8 @@ def search_with_baseline_method_qiskit(N, M_estimated, answersSetOriginal):
             #
             num_discovered_solutions += 1
             M_estimated = M_estimated - 1            
-            zero_streak = 0
-            answersSet.remove(measuredValueInt)
-            #answersSortedList.remove(measuredValueInt)
+            zero_streak = 0            
+            del answersSet[measuredValueInt]            
             new_solution_just_found = True
             #print(f"{measuredValueInt} was found")
         else:
@@ -342,16 +335,15 @@ def addControlledGroverIterator(qc, controlQubitIndex, dataQubitIndices, ancilla
     assert isinstance(ancillaQubitIndices, list) and all(isinstance(e, int) for e in ancillaQubitIndices), f"ancillaQubitIndices(={ancillaQubitIndices} must be a list with integers)"        
     numAncillaQubits = len(ancillaQubitIndices)
     assert numAncillaQubits == numDataQubits - 1 , f"The number of ancilla qubits(={numDataQubits}) must be equal to the number of ancilla qubits(={numAncillaQubits} minus one)"
-    searchSpaceSize = 2 ** numDataQubits
-    #assert isinstance(answers, list) and all(isinstance(e, int) for e in answers) and all(0<=e and e<=searchSpaceSize-1 for e in answers), f"answers(={answers} must be a list with integers within [0, {searchSpaceSize-1}])"
+    searchSpaceSize = 2 ** numDataQubits    
     assert isinstance(numIterations, int), f"numIterations(={numIterations}) must be an integer"
-    answersInBinary = [f"{answer:0{numDataQubits}b}" for answer in answers]    
+        
 
     for _ in range(numIterations):
         #
         # Oracle - sign-invert each answer
         #
-        for answerInBinary in answersInBinary:
+        for _, answerInBinary in answers.items():
             for bitPosition in range(numDataQubits):
                 if answerInBinary[numDataQubits - bitPosition - 1] == '0': qc.x(dataQubitIndices[bitPosition])                
         
@@ -395,12 +387,14 @@ def generateAnswersWithEvenDistribution(searchSpaceSize, numTargets):
     Generate solutions for Scenario-even
         randomly generate solutions, so that no explicit cluter exists
     '''
-    answerSet = set() 
+    answerSet = {}
+    numDataQubits = int(math.log2(searchSpaceSize))
     for _ in range(numTargets):
         r = random.randint(0, searchSpaceSize - 1)
         while r in answerSet:
             r = random.randint(0, searchSpaceSize - 1)
-        answerSet.add(r)
+        answerInBinary = f"{r:0{numDataQubits}b}"
+        answerSet[r] = answerInBinary
 
     return answerSet
 
