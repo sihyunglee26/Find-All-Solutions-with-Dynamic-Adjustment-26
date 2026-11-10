@@ -283,9 +283,17 @@ if __name__ == "__main__":
     # M_estimated_list: list of (likely estimate of M by Quantum Counting, its frequency), assuming # of counting qubit m = ceiling(log_2(sqrt(N))) 
     # N: size of search space        
     #
+    '''n = 6
+    M = 6
+    M_estimated_list = [(9, 6), (0, 3), (32, 1)]'''
+    
     n = 8
-    M = 2    
+    M = 2
     M_estimated_list = [(0, 5), (10, 5)]
+
+    '''n = 10
+    M = 24
+    M_estimated_list = [(9, 1), (0, 1), (39, 5), (87, 1)]'''
 
     '''n = 12
     M = 61
