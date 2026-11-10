@@ -71,7 +71,7 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
     max_history_length = 20             # success_n_Mestimated_history를 기록하는 최대 길이 (모두를 기록하면 Mestimated를 adjust하는 시간이 너무 길어지므로 길이 제한)
     success_n_Mestimated_history = []   # stores a list of 2-tupes (1(success) or 0(failures), M_estimated)
     one_streak, zero_streak = 0, 0    
-    num_M_decreased_from_last_adjustment = 0
+    earlier_success_count = 0
 
     #
     # Prepare variables used to trigger the adjustment of M_estimate
@@ -84,7 +84,7 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
     # Prepare hypotheses that represent candidate M values
     #
     min_M_hypothesis = max(int(M_estimated - error_margin), 0)
-    max_M_hypothesis = min(int(M_estimated + error_margin), int(math.sqrt(N)))
+    max_M_hypothesis = min(int(M_estimated + error_margin), int(N))        
     num_hypothesis = (max_M_hypothesis - min_M_hypothesis + 1)
     equal_probability_log = math.log(1 / num_hypothesis)
     M_hypotheses = [(M_hypotesis, equal_probability_log) for M_hypotesis in range(min_M_hypothesis, max_M_hypothesis + 1)]
@@ -117,7 +117,7 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
             num_discovered_solutions += 1
             M_estimated = M_estimated - 1
             M = M - 1
-            num_M_decreased_from_last_adjustment += 1
+            earlier_success_count += 1
         else:
             #
             # Grover's algorithm failed to discover a solution
@@ -141,9 +141,9 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
             if len(success_n_Mestimated_history) > max_history_length: 
                 success_n_Mestimated_history = success_n_Mestimated_history[len(success_n_Mestimated_history) - max_history_length:]
 
-            num_M_decreased_from_last_adjustment_till_before_last_interval = num_M_decreased_from_last_adjustment
+            omitted_successes = earlier_success_count
             for s, _ in success_n_Mestimated_history[::-1]:
-                if s == 1: num_M_decreased_from_last_adjustment_till_before_last_interval -= 1
+                if s == 1: omitted_successes -= 1
             num_hypothesis_before = len(M_hypotheses)
 
             #
@@ -154,10 +154,10 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
             M_hypotheses_posterior = []            
             max_probability_posterior, max_probability_hypothesis = None, None
             for hypothesis, probability_prior in M_hypotheses:
-                if hypothesis - num_M_decreased_from_last_adjustment < 0: continue   # A hypothesis with value < 0 cannot occur, and thus remove it
+                if hypothesis - earlier_success_count < 0: continue   # A hypothesis with value < 0 cannot occur, and thus remove it
 
                 log_likelihood = 0.0
-                hypothesis_copy = hypothesis - num_M_decreased_from_last_adjustment_till_before_last_interval
+                hypothesis_copy = hypothesis - omitted_successes
                 for s, M_estimated_copy in success_n_Mestimated_history:                    
                     if s == 0:                        
                         p = math.sin((2 * math.floor(math.pi / 4 * math.sqrt(N / M_estimated_copy)) + 1) * math.asin(math.sqrt(hypothesis_copy / N))) ** 2
@@ -177,6 +177,7 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
                     max_probability_hypothesis = hypothesis_copy                
             
             adjustment_round += 1
+            success_n_Mestimated_history.clear()  # (v2.0) Added to make sure that once-used history is not used again
 
             #
             # Remove remove_percentage_per_round % of unlikely hypotheses to optimize performance            
@@ -238,7 +239,7 @@ def simulate_search_with_dynamic_adjustment(N, M, M_estimated, error_margin):
             else:
                 logging.debug(f"M_estimated {M_estimated} does not change")                    
 
-            num_M_decreased_from_last_adjustment = 0
+            earlier_success_count = 0
             logging.debug(f"# of hypothesis changed from {num_hypothesis_before} to {num_hypothesis_after}")
             logging.debug('\n'.join(output_list))
 
